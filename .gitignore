@@ -1,0 +1,16 @@
+**/__history/
+**/__recovery/
+Logs/
+
+**.ppu
+**.o
+**.dcu
+**.exe
+
+**.405
+
+**.local
+**.identcache
+**.res
+**.dproj
+**.tvsconfig
