@@ -19,7 +19,7 @@ procedure OutNET(net: types.NETWORK);
 
 procedure OutFlag(flag: types.FLAGS);
 
-procedure FillZero( var net, net2, net3: types.NETWORK;
+procedure FillZero(var net, net2, net3: types.NETWORK;
                     var flag, flag2, flag3: types.FLAGS;
                     var t: types.TIME_DATA;
                     var phi, phi2, phi3: types.ANGLE_DATA;
@@ -31,6 +31,8 @@ procedure FillNetsAndArrays(TYPE_: boolean;
                             var net: types.NETWORK;
                             var flag: types.FLAGS;
                             var phi, dot_phi: types.ANGLE_DATA);
+
+procedure Warning(const path: string);
 
 function _Length(phi: types.ANGLE_DATA;
                 res: integer): integer;
@@ -108,6 +110,19 @@ begin
     _InsertGaps := phi_with_gaps;
 end;
 
+
+
+procedure Warning(const path: string);
+var input: string; // Ввод пользователя
+begin
+    if FileExists(path) then
+    begin
+        write('Файл ' + path + ' уже существует. Перезаписать? [y/n]: ');
+        readln(input);
+        if (input = 'n') then
+            halt;
+    end;
+end;
 
 
 function _Length(phi: types.ANGLE_DATA;

@@ -18,7 +18,8 @@ procedure Classification(net: types.NETWORK;
                         flag: types.FLAGS;
                         t: types.TIME_DATA;
                         phi, dot_phi: types.ANGLE_DATA;
-                        var classes: types.CLS);
+                        var classes: types.CLS;
+                        var transitions: types.COUNTER);
 
 procedure _Libration(flag: types.FLAGS;
                      increase, decrease, zeros: types.COUNTER;
@@ -34,7 +35,8 @@ procedure Classification(net: types.NETWORK;
                         flag: types.FLAGS;
                         t: types.TIME_DATA;
                         phi, dot_phi: types.ANGLE_DATA;
-                        var classes: types.CLS);
+                        var classes: types.CLS;
+                        var transitions: types.COUNTER);
 // Классификация резонанса
 // Параметры:
 // net - сетка графика
@@ -49,7 +51,7 @@ procedure Classification(net: types.NETWORK;
 var
     res, i: integer;
     length: integer;
-    transitions, zero_counter, increase, decrease: types.COUNTER;
+    zero_counter, increase, decrease: types.COUNTER;
 
 begin
     increase := utils._FillCounterByZeros();
