@@ -18,8 +18,7 @@ procedure Classification(net: types.NETWORK;
                         flag: types.FLAGS;
                         t: types.TIME_DATA;
                         phi, dot_phi: types.ANGLE_DATA;
-                        var classes: types.CLS;
-                        var transitions: types.COUNTER);
+                        var classes: types.CLS);
 
 procedure _Libration(flag: types.FLAGS;
                      increase, decrease, zeros: types.COUNTER;
@@ -35,8 +34,7 @@ procedure Classification(net: types.NETWORK;
                         flag: types.FLAGS;
                         t: types.TIME_DATA;
                         phi, dot_phi: types.ANGLE_DATA;
-                        var classes: types.CLS;
-                        var transitions: types.COUNTER);
+                        var classes: types.CLS);
 // Классификация резонанса
 // Параметры:
 // net - сетка графика
@@ -51,7 +49,7 @@ procedure Classification(net: types.NETWORK;
 var
     res, i: integer;
     length: integer;
-    zero_counter, increase, decrease: types.COUNTER;
+    transitions, zero_counter, increase, decrease: types.COUNTER;
 
 begin
     increase := utils._FillCounterByZeros();
@@ -76,9 +74,7 @@ begin
 
             // Подсчёт переходов частоты через 0
             if (dot_phi[res, i] * dot_phi[res, i+1]) < 0 then inc(transitions[res]);
-
         end; {for i}
-        // if (transitions > count * coef) then class_ := 2;
     end; {for res}
 
     _Libration(flag, increase, decrease, zero_counter, classes);

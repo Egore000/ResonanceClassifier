@@ -42,10 +42,16 @@ begin {Main}
 
     write(trans, 'folder', config.DELIMITER,
                    'file', config.DELIMITER,
-                   'a', a0, config.DELIMITER,
-                   'i', i0, config.DELIMITER);
+                   'a', config.DELIMITER,
+                   'i', config.DELIMITER);
     for num := config.RES_START to config.RES_FINISH do
         write(trans, 'dF' + inttostr(num), config.DELIMITER);
+    for num := config.RES_START to config.RES_FINISH do
+        write(trans, 'dF' + inttostr(num) + '_max', config.DELIMITER);
+    for num := config.RES_START to config.RES_FINISH do
+        write(trans, 'dF' + inttostr(num) + '_min', config.DELIMITER);
+    for num := config.RES_START to config.RES_FINISH do
+        write(trans, 'dF' + inttostr(num) + '_max_abs', config.DELIMITER);
     writeln(trans);
 
     {Цикл по папкам}
@@ -151,13 +157,24 @@ begin {Main}
 
             {Классификация орбитальных резонансов}
             if config.ORBITAL then
-                Classifier.Classification(net, flag, t, phi, dot_phi, classes, transitions);
+                Classifier.Classification(net, flag, t, phi, dot_phi, classes);
 
             {Классификация вторичных резонансов}
             if config.SECONDARY then
             begin
-                Classifier.Classification(net2, flag2, t, phi2, dot_phi2, classes2, transitions2);
-                Classifier.Classification(net3, flag3, t, phi3, dot_phi3, classes3, transitions3);
+                Classifier.Classification(net2, flag2, t, phi2, dot_phi2, classes2);
+                Classifier.Classification(net3, flag3, t, phi3, dot_phi3, classes3);
+            end;
+
+            for num := config.RES_START to config.RES_FINISH do
+            begin
+                transitions[num] := service.CountTransitions(dot_phi, num);
+                transitions2[num] := service.CountTransitions(dot_phi2, num);
+                transitions3[num] := service.CountTransitions(dot_phi3, num);
+
+                max_dphi[num] := service.GetMaximumDotPhi(dot_phi, num);
+                min_dphi[num] := service.GetMinimumDotPhi(dot_phi, num);
+                max_abs_dphi[num] := service.GetMaximumABSDotPhi(dot_phi, num);
             end;
 
             {Вывод разбиения для либрации при отладке}
@@ -175,6 +192,12 @@ begin {Main}
                         i0, config.DELIMITER);
             for num := config.RES_START to config.RES_FINISH do
                 write(trans, transitions[num], config.DELIMITER);
+            for num := config.RES_START to config.RES_FINISH do
+                write(trans, max_dphi[num], config.DELIMITER);
+            for num := config.RES_START to config.RES_FINISH do
+                write(trans, min_dphi[num], config.DELIMITER);
+            for num := config.RES_START to config.RES_FINISH do
+                write(trans, max_abs_dphi[num], config.DELIMITER);
             writeln(trans);
 
             {Закрытие файлов, если они были открыты на запись}
