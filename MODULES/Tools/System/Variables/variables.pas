@@ -10,13 +10,9 @@ var coords, velocities: MAS; // Массивы координат и скоро�
     angles, angles2, angles3: ARR; // Массивы резонансных углов Ф
     freq, freq2, freq3: ARR; // Массивы резонансных частот Ф'
 
-    max_dphi, min_dphi, max_abs_dphi: ARR;
-
     net, net2, net3: NETWORK; // Сетки для разных наборов данных
     flag, flag2, flag3: FLAGS; // Полосы либрации
     classes, classes2, classes3: CLS; // Массивы с классификацией резонансов
-
-    transitions, transitions2, transitions3: COUNTER;
 
     a, e, i, Omega, w, M, megno, mean_megno, mean: extended;
     a0, i0: extended; // Начальные параметры орбиты
@@ -37,7 +33,7 @@ var coords, velocities: MAS; // Массивы координат и скоро�
     dot_phi, dot_phi2, dot_phi3: ANGLE_DATA; // Массивы с резонансными частотами
     t: TIME_DATA; // Массив с моментами времени
 
-    file_name: string;
+    file_name: string; // Название файла
 
 implementation
 begin

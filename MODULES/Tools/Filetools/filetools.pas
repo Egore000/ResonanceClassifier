@@ -8,7 +8,7 @@ uses SysUtils,
     constants,
     config;
 
-procedure Create_File(var f: text;
+procedure CreateFile(var f: text;
                     path: string);
 
 procedure WriteToFile(var f: text;
@@ -20,13 +20,19 @@ procedure WriteClassification(var f: text;
                             a0, i0, megno: extended;
                             classes, classes2, classes3: types.CLS);
 
-procedure WriteHeader(var f: text);
+procedure WriteClassificationHeader(var f: text);
+
+procedure WriteTransitions(var f: text;
+                            transitions: types.COUNTER;
+                            max_dphi, min_dphi, max_abs_dphi: types.ARR);
+
+procedure WriteTransitionHeader(var f: text);
 
 function FileNumberToFileName(file_number: integer): string;
 
 implementation
 
-procedure Create_File(var f: text;
+procedure CreateFile(var f: text;
                     path: string);
 // Создание файла с данными об эволюции резонансных аргументов
 // и запись в него заголовка
@@ -95,8 +101,7 @@ begin
 end; {WriteClassification}
 
 
-
-procedure WriteHeader(var f: text);
+procedure WriteClassificationHeader(var f: text);
 // Заполнение заголовка файла классификации для Ф и Ф'
 
 // Заголовок заполняется автоматически для тех резонансных аргументов,
@@ -127,6 +132,70 @@ begin
     end;
     writeln(f);
 end; {WriteHeader}
+
+
+procedure WriteTransitions(var f: text;
+                            transitions: types.COUNTER;
+                            max_dphi, min_dphi, max_abs_dphi: types.ARR);
+var
+    num: integer;
+begin
+    for num := config.RES_START to config.RES_FINISH do
+        write(f, transitions[num], config.DELIMITER);
+    for num := config.RES_START to config.RES_FINISH do
+        write(f, max_dphi[num], config.DELIMITER);
+    for num := config.RES_START to config.RES_FINISH do
+        write(f, min_dphi[num], config.DELIMITER);
+    for num := config.RES_START to config.RES_FINISH do
+        write(f, max_abs_dphi[num], config.DELIMITER);
+end;
+
+procedure WriteTransitionHeader(var f: text);
+// Запись заголовка в файл для данных о переходах частоты через 0
+// и её максимальных значениях.
+var num: integer;
+begin
+    write(f, 'folder', config.DELIMITER,
+                   'file', config.DELIMITER,
+                   'a', config.DELIMITER,
+                   'i', config.DELIMITER);
+    if config.ORBITAL then
+    begin
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'dF' + inttostr(num), config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'dF' + inttostr(num) + '_max', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'dF' + inttostr(num) + '_min', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'dF' + inttostr(num) + '_max_abs', config.DELIMITER);
+    end;
+
+    if config.SECONDARY then
+    begin
+        // Вторичные резонансы с плюсом
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '+', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '+_max', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '+_min', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '+_max_abs', config.DELIMITER);
+
+        // Вторичные резонансы с минусом
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '-', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '-_max', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '-_min', config.DELIMITER);
+        for num := config.RES_START to config.RES_FINISH do
+            write(f, 'sec_dF' + inttostr(num) + '-_max_abs', config.DELIMITER);
+    end;
+
+    writeln(f);
+end; {WriteTransitionHeader}
 
 
 function FileNumberToFileName(file_number: integer): string;

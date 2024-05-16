@@ -7,6 +7,7 @@ uses SysUtils,
     readfond,
     config,
     types,
+    filetools,
     constants;
 
 procedure fond405(jd: extended; 
@@ -32,6 +33,9 @@ procedure FillNetsAndArrays(TYPE_: boolean;
                             var flag: types.FLAGS;
                             var phi, dot_phi: types.ANGLE_DATA);
 
+//procedure FrequencyResearch(var f: text;
+//                            df1, df2, df3: types.ANGLE_DATA);
+
 procedure Warning(const path: string);
 
 function _Length(phi: types.ANGLE_DATA;
@@ -45,13 +49,13 @@ function _isDecreaseBranch(current, next: extended): boolean;
 
 function _isIncreaseBranch(current, next: extended): boolean;
 
-function CountTransitions(dphi: types.ANGLE_DATA; res: integer): integer;
-
-function GetMaximumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-
-function GetMinimumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-
-function GetMaximumABSDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
+//function CountTransitions(dphi: types.ANGLE_DATA; res: integer): integer;
+//
+//function GetMaximumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
+//
+//function GetMinimumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
+//
+//function GetMaximumABSDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
 
 implementation
 
@@ -117,7 +121,6 @@ begin
 
     _InsertGaps := phi_with_gaps;
 end;
-
 
 
 procedure Warning(const path: string);
@@ -272,50 +275,6 @@ function _isIncreaseBranch(current, next: extended): boolean;
 begin
     _isIncreaseBranch := (current/2 > next) and
                          (current > 360 - config.BRANCH_LIMIT);
-end;
-
-
-function CountTransitions(dphi: types.ANGLE_DATA; res: integer): integer;
-var i, len: integer;
-begin
-    Result := 0;
-    len := _Length(dphi, res);
-    for i := 1 to len-1 do
-        if (dphi[res, i] * dphi[res, i+1] < 0) then
-            inc(Result);
-end;
-
-
-function GetMaximumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-var i, len: integer;
-begin
-    Result := dphi[res, 1];
-    len := _Length(dphi, res);
-    for i := 1 to len do
-        if (dphi[res, i] < Result) then
-            Result := dphi[res, i];
-end;
-
-
-function GetMinimumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-var i, len: integer;
-begin
-    Result := dphi[res, 1];
-    len := _Length(dphi, res);
-    for i := 1 to len do
-        if (dphi[res, i] > Result) then
-            Result := dphi[res, i];
-end;
-
-
-function GetMaximumABSDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-var i, len: integer;
-begin
-    Result := abs(dphi[res, 1]);
-    len := _Length(dphi, res);
-    for i := 1 to len do
-        if (abs(dphi[res, i]) < Result) then
-            Result := abs(dphi[res, i]);
 end;
 
 begin

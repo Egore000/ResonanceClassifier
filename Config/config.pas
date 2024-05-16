@@ -22,10 +22,10 @@ const
     LOGS = false; // Запись в логфайл
 
     START_FOLDER = 1; // Начальная папка
-    FINISH_FOLDER = 3; // Конечная папка
+    FINISH_FOLDER = 1; // Конечная папка
 
     START_FILE = 1; // Начальный файл
-    FINISH_FILE = 9000; // Конечный файл
+    FINISH_FILE = 2; // Конечный файл
 
     RES_START = 1; // Начальная компонента резонанса
     RES_FINISH = 5; // Конечная компонента резонанса
@@ -64,13 +64,13 @@ const
     // TARGET_FOLDER = 'Со световым давлением';
 
 //    OMEGA_VALUE = 'Omega_240';
-     OMEGA_VALUE = 'Omega_120';
-//     OMEGA_VALUE = 'Omega_0';
+//     OMEGA_VALUE = 'Omega_120';
+     OMEGA_VALUE = 'Omega_0';
 
     PATH_DATA = BASE_DIR + 'Исходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\'; // Путь к папке с исходными данными
 
     PATH_CLASSIFICATION = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Классификация_test.DAT'; // Путь к файлу с классификацией
-    PATH_TRANS = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Переходы.DAT'; // Путь к файлу с переходами частоты через 0
+    PATH_TRANS = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Переходы_test.DAT'; // Путь к файлу с переходами частоты через 0
 
     PATH_ORBITAL = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Орбитальные\'; // Путь к папке с данными об орбитальных резонансах
     PATH_SECOND_PLUS = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Вторичные\плюс\'; // Путь к папке с данными о вторичных резонансах (+)
