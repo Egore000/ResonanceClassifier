@@ -6,23 +6,22 @@ program ResonanceClassifier;
 
 {$R *.res}
 
-uses SysUtils,
-    Classifier in 'MODULES\Classifier\Classifier.pas',
-    utils in 'MODULES\Classifier\Utils\utils.pas',
-
-    ResonanceUnit in 'MODULES\Resonance\ResonanceUnit.pas',
-    readfond in 'MODULES\Tools\ReadFond\readfond.pas',
-    TwoBody in 'MODULES\TwoBody\TwoBody.pas',
-
-    types in 'MODULES\Tools\System\Types\types.pas',
-    variables in 'MODULES\Tools\System\Variables\variables.pas',
-    constants in 'MODULES\Tools\System\Constants\constants.pas',
-    service in 'MODULES\Tools\Service\service.pas',
-    math in 'MODULES\Tools\Math\math.pas',
-    filetools in 'MODULES\Tools\Filetools\filetools.pas',
-    logging in 'MODULES\Tools\Logging\logging.pas',
-
-    config in 'Config\config.pas';
+uses
+  SysUtils,
+  Classifier in 'MODULES\Classifier\Classifier.pas',
+  utils in 'MODULES\Classifier\Utils\utils.pas',
+  ResonanceUnit in 'MODULES\Resonance\ResonanceUnit.pas',
+  readfond in 'MODULES\Tools\ReadFond\readfond.pas',
+  TwoBody in 'MODULES\TwoBody\TwoBody.pas',
+  types in 'MODULES\Tools\System\Types\types.pas',
+  variables in 'MODULES\Tools\System\Variables\variables.pas',
+  constants in 'MODULES\Tools\System\Constants\constants.pas',
+  service in 'MODULES\Tools\Service\service.pas',
+  math in 'MODULES\Tools\Math\math.pas',
+  filetools in 'MODULES\Tools\Filetools\filetools.pas',
+  logging in 'MODULES\Tools\Logging\logging.pas',
+  config in 'Config\config.pas',
+  FreqUnit in 'MODULES\FrequencyResearch\FreqUnit.pas';
 
 var folder, num, number: integer;
 
@@ -34,25 +33,20 @@ begin {Main}
     assign(outdata, config.PATH_CLASSIFICATION);
     rewrite(outdata);
 
-    assign(trans, config.PATH_TRANS);
-    rewrite(trans);
-
     {Заполнение заголовка в файле классификации}
-    filetools.WriteHeader(outdata);
+    filetools.WriteClassificationHeader(outdata);
 
-    write(trans, 'folder', config.DELIMITER,
-                   'file', config.DELIMITER,
-                   'a', config.DELIMITER,
-                   'i', config.DELIMITER);
-    for num := config.RES_START to config.RES_FINISH do
-        write(trans, 'dF' + inttostr(num), config.DELIMITER);
-    for num := config.RES_START to config.RES_FINISH do
-        write(trans, 'dF' + inttostr(num) + '_max', config.DELIMITER);
-    for num := config.RES_START to config.RES_FINISH do
-        write(trans, 'dF' + inttostr(num) + '_min', config.DELIMITER);
-    for num := config.RES_START to config.RES_FINISH do
-        write(trans, 'dF' + inttostr(num) + '_max_abs', config.DELIMITER);
-    writeln(trans);
+    if config.FREQUENCY then
+    begin
+        {Проверка существования файла и предупреждение о перезаписи}
+        service.Warning(config.PATH_TRANS);
+
+        assign(trans, config.PATH_TRANS);
+        rewrite(trans);
+
+        {Заполнение заголовка в файле с данными о частотах}
+        filetools.WriteTransitionHeader(trans);
+    end;
 
     {Цикл по папкам}
     for folder := config.START_FOLDER to config.FINISH_FOLDER do
@@ -74,13 +68,13 @@ begin {Main}
 
             {Связь с файлами, в случае, если осуществляется запись}
             if (config.ORBITAL and config.WRITE_ORBIT) then
-                filetools.Create_File(orbit_res, config.PATH_ORBITAL + inttostr(folder) + '\' + file_name + '.dat');
+                filetools.CreateFile(orbit_res, config.PATH_ORBITAL + inttostr(folder) + '\' + file_name + '.dat');
 
             if (config.SECONDARY and config.WRITE_SECOND_PLUS) then
-                filetools.Create_File(second_plus, config.PATH_SECOND_PLUS + inttostr(folder) + '\' + file_name + '.dat');
+                filetools.CreateFile(second_plus, config.PATH_SECOND_PLUS + inttostr(folder) + '\' + file_name + '.dat');
 
             if (config.SECONDARY and config.WRITE_SECOND_MINUS) then
-                filetools.Create_File(second_minus, config.PATH_SECOND_MINUS + inttostr(folder) + '\' + file_name + '.dat');
+                filetools.CreateFile(second_minus, config.PATH_SECOND_MINUS + inttostr(folder) + '\' + file_name + '.dat');
 
             {Заполнение массивов нулями}
             service.FillZero(
@@ -166,15 +160,14 @@ begin {Main}
                 Classifier.Classification(net3, flag3, t, phi3, dot_phi3, classes3);
             end;
 
-            for num := config.RES_START to config.RES_FINISH do
+            {Изучение частот}
+            if config.FREQUENCY then
             begin
-                transitions[num] := service.CountTransitions(dot_phi, num);
-                transitions2[num] := service.CountTransitions(dot_phi2, num);
-                transitions3[num] := service.CountTransitions(dot_phi3, num);
-
-                max_dphi[num] := service.GetMaximumDotPhi(dot_phi, num);
-                min_dphi[num] := service.GetMinimumDotPhi(dot_phi, num);
-                max_abs_dphi[num] := service.GetMaximumABSDotPhi(dot_phi, num);
+                write(trans, folder, config.DELIMITER,
+                            number, config.DELIMITER,
+                            a0, config.DELIMITER,
+                            i0, config.DELIMITER);
+                FreqUnit.FrequencyResearch(trans, dot_phi, dot_phi2, dot_phi3);
             end;
 
             {Вывод разбиения для либрации при отладке}
@@ -185,20 +178,6 @@ begin {Main}
 
             {Запись классификации в файл}
             filetools.WriteClassification(outdata, folder, number, a0, i0, mean, classes, classes2, classes3);
-
-            write(trans, folder, config.DELIMITER,
-                        number, config.DELIMITER,
-                        a0, config.DELIMITER,
-                        i0, config.DELIMITER);
-            for num := config.RES_START to config.RES_FINISH do
-                write(trans, transitions[num], config.DELIMITER);
-            for num := config.RES_START to config.RES_FINISH do
-                write(trans, max_dphi[num], config.DELIMITER);
-            for num := config.RES_START to config.RES_FINISH do
-                write(trans, min_dphi[num], config.DELIMITER);
-            for num := config.RES_START to config.RES_FINISH do
-                write(trans, max_abs_dphi[num], config.DELIMITER);
-            writeln(trans);
 
             {Закрытие файлов, если они были открыты на запись}
             if (config.SECONDARY and config.WRITE_SECOND_PLUS) then
@@ -215,7 +194,9 @@ begin {Main}
             close(data);
         end; {for number}
     close(outdata);
-    close(trans);
+
+    if config.FREQUENCY then
+        close(trans);
 
     if config.LOGS then close(logger);
     writeln('Finished!');
