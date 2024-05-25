@@ -66,17 +66,15 @@ begin
         begin
             // Подсчёт убывющих точек
             if service._isDecrease(phi[res, i], phi[res, i+1]) then
-            else inc(decrease[res]);
+                inc(decrease[res]);
 
             // Подсчёт возрастающих точек
             if service._isIncrease(phi[res, i], phi[res, i+1]) then
-            else inc(increase[res]);
+                inc(increase[res]);
 
             // Подсчёт переходов частоты через 0
             if (dot_phi[res, i] * dot_phi[res, i+1]) < 0 then inc(transitions[res]);
-
         end; {for i}
-        // if (transitions > count * coef) then class_ := 2;
     end; {for res}
 
     _Libration(flag, increase, decrease, zero_counter, classes);

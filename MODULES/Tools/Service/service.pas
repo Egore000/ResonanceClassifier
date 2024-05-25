@@ -7,6 +7,7 @@ uses SysUtils,
     readfond,
     config,
     types,
+    filetools,
     constants;
 
 procedure fond405(jd: extended; 
@@ -19,7 +20,7 @@ procedure OutNET(net: types.NETWORK);
 
 procedure OutFlag(flag: types.FLAGS);
 
-procedure FillZero( var net, net2, net3: types.NETWORK;
+procedure FillZero(var net, net2, net3: types.NETWORK;
                     var flag, flag2, flag3: types.FLAGS;
                     var t: types.TIME_DATA;
                     var phi, phi2, phi3: types.ANGLE_DATA;
@@ -32,6 +33,11 @@ procedure FillNetsAndArrays(TYPE_: boolean;
                             var flag: types.FLAGS;
                             var phi, dot_phi: types.ANGLE_DATA);
 
+//procedure FrequencyResearch(var f: text;
+//                            df1, df2, df3: types.ANGLE_DATA);
+
+procedure Warning(const path: string);
+
 function _Length(phi: types.ANGLE_DATA;
                 res: integer): integer;
 
@@ -42,6 +48,14 @@ function _isIncrease(current, next: extended): boolean;
 function _isDecreaseBranch(current, next: extended): boolean;
 
 function _isIncreaseBranch(current, next: extended): boolean;
+
+//function CountTransitions(dphi: types.ANGLE_DATA; res: integer): integer;
+//
+//function GetMaximumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
+//
+//function GetMinimumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
+//
+//function GetMaximumABSDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
 
 implementation
 
@@ -108,6 +122,18 @@ begin
     _InsertGaps := phi_with_gaps;
 end;
 
+
+procedure Warning(const path: string);
+var input: string; // Ввод пользователя
+begin
+    if FileExists(path) then
+    begin
+        write('Файл ' + path + ' уже существует. Перезаписать? [y/n]: ');
+        readln(input);
+        if (input = 'n') then
+            halt;
+    end;
+end;
 
 
 function _Length(phi: types.ANGLE_DATA;
@@ -250,8 +276,6 @@ begin
     _isIncreaseBranch := (current/2 > next) and
                          (current > 360 - config.BRANCH_LIMIT);
 end;
-
-
 
 begin
 end.
