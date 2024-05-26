@@ -8,20 +8,29 @@ program ResonanceClassifier;
 
 uses
   SysUtils,
+
   Classifier in 'MODULES\Classifier\Classifier.pas',
   utils in 'MODULES\Classifier\Utils\utils.pas',
+
   ResonanceUnit in 'MODULES\Resonance\ResonanceUnit.pas',
+
   readfond in 'MODULES\Tools\ReadFond\readfond.pas',
+
   TwoBody in 'MODULES\TwoBody\TwoBody.pas',
+  FreqUnit in 'MODULES\FrequencyResearch\FreqUnit.pas',
+
   types in 'MODULES\Tools\System\Types\types.pas',
   variables in 'MODULES\Tools\System\Variables\variables.pas',
   constants in 'MODULES\Tools\System\Constants\constants.pas',
+
   service in 'MODULES\Tools\Service\service.pas',
   math in 'MODULES\Tools\Math\math.pas',
   filetools in 'MODULES\Tools\Filetools\filetools.pas',
   logging in 'MODULES\Tools\Logging\logging.pas',
+
   config in 'Config\config.pas',
-  FreqUnit in 'MODULES\FrequencyResearch\FreqUnit.pas';
+  classifier_config in 'Config\classifier_config.pas',
+  logging_config in 'Config\logging_config.pas';
 
 var folder, num, number: integer;
 
@@ -68,13 +77,13 @@ begin {Main}
 
             {Связь с файлами, в случае, если осуществляется запись}
             if (config.ORBITAL and config.WRITE_ORBIT) then
-                filetools.CreateFile(orbit_res, config.PATH_ORBITAL + inttostr(folder) + '\' + file_name + '.dat');
+                filetools.CreateFile(orbit_res, config.PATH_ORBITAL + inttostr(folder) + '\EPH_' + file_name + '.dat');
 
             if (config.SECONDARY and config.WRITE_SECOND_PLUS) then
-                filetools.CreateFile(second_plus, config.PATH_SECOND_PLUS + inttostr(folder) + '\' + file_name + '.dat');
+                filetools.CreateFile(second_plus, config.PATH_SECOND_PLUS + inttostr(folder) + '\EPH_' + file_name + '.dat');
 
             if (config.SECONDARY and config.WRITE_SECOND_MINUS) then
-                filetools.CreateFile(second_minus, config.PATH_SECOND_MINUS + inttostr(folder) + '\' + file_name + '.dat');
+                filetools.CreateFile(second_minus, config.PATH_SECOND_MINUS + inttostr(folder) + '\EPH_' + file_name + '.dat');
 
             {Заполнение массивов нулями}
             service.FillZero(
@@ -118,7 +127,7 @@ begin {Main}
                 end; {if SECONDARY}
 
                 t[idx] := time / (86400 * 365); {Перевод секунд в года}
-                time_idx := trunc(t[idx] / config.COL_STEP) + 1;
+                time_idx := trunc(t[idx] / classifier_config.COL_STEP) + 1;
                 for num := config.RES_START to config.RES_FINISH do
                 begin
                     {Заполнение массивов для орбитального резонанса}

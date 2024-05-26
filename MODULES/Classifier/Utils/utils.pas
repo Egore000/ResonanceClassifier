@@ -10,7 +10,8 @@ uses SysUtils,
     math,
     filetools,
     logging,
-    config;
+    config,
+    classifier_config;
 
 function _CountZerosInNet(net: types.NETWORK; res: integer): integer;
 
@@ -23,12 +24,16 @@ procedure _DebugResonanceInfo(class_: types.CLS;
 procedure _DebugArraysInfo(increase, decrease: types.COUNTER;
                             net: types.NETWORK);
 
-function _GetDiffsArray(phi: types.ANGLE_DATA;
-                        res: integer): types.EXTREMUM_DIFFS;
+procedure _GetDiffsArray(phi: types.ANGLE_DATA;
+                        time: types.TIME_DATA;
+                        res: integer;
+                        var diffs, time_diffs: types.EXTREMUM_DIFFS);
 
-function _isLibration(diffs: types.EXTREMUM_DIFFS): boolean;
+function _isLibration(diffs, time_diffs: types.EXTREMUM_DIFFS): boolean;
 
 function _isInAcceptebleInterval(diff, mean: extended): boolean;
+
+function _isInAcceptebleIntervalTime(diff, mean: extended): boolean;
 
 function _isMinimum(phi: types.ANGLE_DATA;
                     res, idx: integer): boolean;
@@ -50,9 +55,9 @@ var row, col, zeros: integer;
 begin
     zeros := 0;
     // Цикл по строчкам сетки
-    for row := 1 to config.ROWS do
+    for row := 1 to classifier_config.ROWS do
         // Цикл по столбцам
-        for col := 1 to config.COLS do
+        for col := 1 to classifier_config.COLS do
             if (net[res, row, col] = 0) then inc(zeros);
 
     Result := zeros;
@@ -108,18 +113,25 @@ end; {_DebugArraysInfo}
 
 
 
-function _isLibration(diffs: types.EXTREMUM_DIFFS): boolean;
+function _isLibration(diffs, time_diffs: types.EXTREMUM_DIFFS): boolean;
 var idx, len: integer;
-    mean: extended;
+    mean, time_mean: extended;
     libration_percent: extended;
     libration: integer;
 begin
     len := _Len(diffs);
 
     mean := _Mean(diffs);
+    time_mean := _Mean(time_diffs);
+
+    logging.LogDiffs(logging.logger, diffs, len, '[DIFFS]');
+    logging.LogDiffs(logging.logger, time_diffs, len, '[TIME DIFFS]');
+
     libration := 0;
     for idx := 1 to len-1 do
-        if _isInAcceptebleInterval(diffs[idx], mean) then
+        if _isInAcceptebleInterval(diffs[idx], mean) and
+            _isInAcceptebleIntervalTime(time_diffs[idx], time_mean) then
+            
             inc(libration);
 
     if len <> 0 then
@@ -127,42 +139,61 @@ begin
     else
         libration_percent := 0;
 
-    if libration_percent >= config.LIBRATION_PERCENT_LIMIT then
+    if libration_percent >= classifier_config.LIBRATION_PERCENT_LIMIT then
         _isLibration := True
     else
         _isLibration := False;
 
-    // LogShiftingLibrationInfo(logger, mean, len, libration, libration_percent);
+    LogShiftingLibrationInfo(logger, mean, time_mean, len, libration, libration_percent);
 end;
 
 
 
 function _isInAcceptebleInterval(diff, mean: extended): boolean;
 begin
-    _isInAcceptebleInterval := (diff >= mean - config.EXTREMUM_LIMIT) and
-                               (diff <= mean + config.EXTREMUM_LIMIT);
+    _isInAcceptebleInterval := (diff >= mean - classifier_config.EXTREMUM_LIMIT) and
+                               (diff <= mean + classifier_config.EXTREMUM_LIMIT);
 end;
 
 
 
-function _GetDiffsArray(phi: types.ANGLE_DATA;
-                        res: integer): types.EXTREMUM_DIFFS;
+function _isInAcceptebleIntervalTime(diff, mean: extended): boolean;
+begin
+    _isInAcceptebleIntervalTime := (diff >= mean - classifier_config.EXTREMUM_LIMIT_TIME) and
+                               (diff <= mean + classifier_config.EXTREMUM_LIMIT_TIME);
+end;
+
+
+procedure _GetDiffsArray(phi: types.ANGLE_DATA;
+                        time: types.TIME_DATA;
+                        res: integer;
+                        var diffs, time_diffs: types.EXTREMUM_DIFFS);
 var
     idx, diffNumber, len: integer;
     localMin, localMax, MinMaxDiff: extended;
-    diffs: types.EXTREMUM_DIFFS;
+    localMinTime, localMaxTime, MinMaxTimeDiff: extended;
+
     phi_: types.ANGLE_DATA;
+    time_: types.TIME_DATA;
 begin
     len := service._Length(phi, res);
-    phi_ := service._InsertGaps(phi, res, len);
+    service._InsertGaps(phi, time, res, len, 
+                        phi_, time_);
 
     localMin := 1e10;
+    localMinTime := 0;
+
     localMax := 1e10;
+    localMaxTime := 0;
+    
     MinMaxDiff := 0;
     diffNumber := 0;
 
     for idx := 1 to 1000 do
+    begin
         diffs[idx] := 0;
+        time_diffs[idx] := 0;
+    end;
 
     for idx := 2 to len-1 do
     begin
@@ -172,6 +203,7 @@ begin
         if _isMaximum(phi_, res, idx) then
         begin
             localMax := phi_[res, idx];
+            localMaxTime := time_[idx];
 
             if (localMin = 1e10) then
                 continue;
@@ -180,16 +212,19 @@ begin
                 localMax := localMax + 360;
 
             MinMaxDiff := abs(localMax - localMin);
+            MinMaxTimeDiff := abs(localMaxTime - localMinTime);
 
             inc(diffNumber);
             diffs[diffNumber] := MinMaxDiff;
+            time_diffs[diffNumber] := MinMaxTimeDiff;
         end;
 
         if _isMinimum(phi_, res, idx) then
+        begin
             localMin := phi_[res, idx];
+            localMinTime := time_[idx];
+        end;
     end;
-
-    _GetDiffsArray := diffs;
 end;
 
 

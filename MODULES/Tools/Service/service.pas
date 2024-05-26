@@ -6,6 +6,7 @@ interface
 uses SysUtils,
     readfond,
     config,
+    classifier_config,
     types,
     filetools,
     constants;
@@ -13,8 +14,11 @@ uses SysUtils,
 procedure fond405(jd: extended; 
                 var xm_, xs_, vm_, vs_: types.MAS);
 
-function _InsertGaps(phi: types.ANGLE_DATA;
-                    res, len: integer): types.ANGLE_DATA;
+procedure _InsertGaps(phi: types.ANGLE_DATA;
+                    time: types.TIME_DATA;
+                    res, len: integer;
+                    var phi_new: types.ANGLE_DATA;
+                    var time_new: types.TIME_DATA);
 
 procedure OutNET(net: types.NETWORK);
 
@@ -93,22 +97,30 @@ end; {fond405}
 
 
 
-function _InsertGaps(phi: ANGLE_DATA; res, len: integer): ANGLE_DATA;
+procedure _InsertGaps(phi: types.ANGLE_DATA;
+                    time: types.TIME_DATA;
+                    res, len: integer;
+                    var phi_new: types.ANGLE_DATA;
+                    var time_new: types.TIME_DATA);
 var i, j: integer;
-    phi_with_gaps: types.ANGLE_DATA;
 begin
     for i := 1 to 2000 do
-        phi_with_gaps[res, i] := 0;
+    begin
+        phi_new[res, i] := 0;
+        time_new[i] := 0;
+    end;
 
     i := 1;
     j := 1;
     while i < len do
     begin
-        phi_with_gaps[res, j] := phi[res, i];
+        phi_new[res, j] := phi[res, i];
+        time_new[j] := time[i];
 
         if (abs(phi[res, i] - phi[res, i+1]) > 240) then
         begin
-            phi_with_gaps[res, j+1] := 1e6;
+            phi_new[res, j+1] := 1e6;
+            time_new[j+1] := 1e6;
             j := j + 2;
         end
         else
@@ -117,10 +129,10 @@ begin
         inc(i);
     end;
 
-    phi_with_gaps[res, j] := phi[res, len];
+    phi_new[res, j] := phi[res, len];
+    time_new[j] := time[len];
+end; {_InsertGaps}
 
-    _InsertGaps := phi_with_gaps;
-end;
 
 
 procedure Warning(const path: string);
@@ -155,9 +167,9 @@ begin
     for num := config.RES_START to config.RES_FINISH do
     begin
         writeln('num = ', num);
-        for row := 1 to config.ROWS do
+        for row := 1 to classifier_config.ROWS do
         begin
-            for col := 1 to config.COLS do
+            for col := 1 to classifier_config.COLS do
             begin
                 write(net[num, row, col], #9);
             end;
@@ -176,7 +188,7 @@ begin
     writeln('[FLAG]');
     for idx := config.RES_START to config.RES_FINISH do
     begin
-        for time_idx := 1 to config.LIBRATION_ROWS do
+        for time_idx := 1 to classifier_config.LIBRATION_ROWS do
             write(flag[idx, time_idx], config.DELIMITER);
         writeln;
     end;
@@ -194,8 +206,8 @@ var num, row, col: integer;
 begin
     for num := config.RES_START to config.RES_FINISH do
     begin
-        for row := 1 to config.ROWS do
-            for col := 1 to config.COLS do
+        for row := 1 to classifier_config.ROWS do
+            for col := 1 to classifier_config.COLS do
             begin
             net[num, row, col] := 0;
             net2[num, row, col] := 0;
@@ -215,7 +227,7 @@ begin
             dot_phi3[num, row] := 0;
         end;
 
-        for row := 1 to config.LIBRATION_ROWS do
+        for row := 1 to classifier_config.LIBRATION_ROWS do
         begin
             flag[num, row] := 0;
             flag2[num, row] := 0;
@@ -237,10 +249,10 @@ var angle_idx: integer;
 begin
     if TYPE_ then
     begin
-        angle_idx := trunc(angles[num] * constants.toDeg / config.ROW_STEP) + 1;
+        angle_idx := trunc(angles[num] * constants.toDeg / classifier_config.ROW_STEP) + 1;
 
         inc(net[num, angle_idx, time_idx]); // Заполнение сетки
-        inc(flag[num, trunc(angles[num] * constants.toDeg / config.LIBRATION_STEP) + 1]); // Заполнение полос
+        inc(flag[num, trunc(angles[num] * constants.toDeg / classifier_config.LIBRATION_STEP) + 1]); // Заполнение полос
 
         phi[num, idx] := angles[num] * constants.toDeg;
         dot_phi[num, idx] := freq[num];
@@ -266,7 +278,7 @@ end;
 function _isDecreaseBranch(current, next: extended): boolean;
 begin
     _isDecreaseBranch := (current < next/2) and
-                         (current < config.BRANCH_LIMIT);
+                         (current < classifier_config.BRANCH_LIMIT);
 end;
 
 
@@ -274,7 +286,7 @@ end;
 function _isIncreaseBranch(current, next: extended): boolean;
 begin
     _isIncreaseBranch := (current/2 > next) and
-                         (current > 360 - config.BRANCH_LIMIT);
+                         (current > 360 - classifier_config.BRANCH_LIMIT);
 end;
 
 begin

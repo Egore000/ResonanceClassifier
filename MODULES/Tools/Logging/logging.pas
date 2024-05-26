@@ -5,6 +5,8 @@ unit logging;
 interface
 uses SysUtils,
     config,
+    logging_config,
+    classifier_config,
     types;
 
 var
@@ -37,8 +39,13 @@ procedure LogIncDec(var logfile: text;
 procedure LogElements(var logfile: text;
                     a0, i0: extended);
 
+procedure LogDiffs(var logfile: text;
+                    diffs: types.EXTREMUM_DIFFS;
+                    len: integer;
+                    const msg: string);
+
 procedure LogShiftingLibrationInfo(var logfile: text;
-                                mean: extended;
+                                mean, time_mean: extended;
                                 len, libration: integer;
                                 libration_percent: extended);
 
@@ -58,7 +65,7 @@ begin
         writeln(logfile, '[FLAGS]');
         for i := config.RES_START to config.RES_FINISH do
         begin
-            for j := 1 to config.LIBRATION_ROWS do
+            for j := 1 to classifier_config.LIBRATION_ROWS do
                 write(logfile, flag[i, j], config.DELIMITER);
             writeln(logfile);
         end;
@@ -80,9 +87,9 @@ begin
         begin
             writeln(logfile, 'NUM = ', num);
 
-            for row := 1 to config.ROWS do
+            for row := 1 to classifier_config.ROWS do
             begin
-                for col := 1 to config.COLS do
+                for col := 1 to classifier_config.COLS do
                     write(logfile, net[num, row, col], config.DELIMITER);
                 writeln(logfile);
             end;
@@ -167,15 +174,32 @@ begin
 end;
 
 
+procedure LogDiffs(var logfile: text;
+                    diffs: types.EXTREMUM_DIFFS;
+                    len: integer;
+                    const msg: string);
+var i: integer;
+begin
+    if config.LOGS then
+    begin
+        writeln(logfile, msg);
+        for i := 1 to len do
+            write(logfile, diffs[i], config.DELIMITER);
+        writeln(logfile);
+    end;
+end;
+
+
 
 procedure LogShiftingLibrationInfo(var logfile: text;
-                                mean: extended;
+                                mean, time_mean: extended;
                                 len, libration: integer;
                                 libration_percent: extended);
 begin
     if config.LOGS then
     begin
         writeln(logfile, '[MEAN]    ', mean);
+        writeln(logfile, '[TIME_MEAN]    ', time_mean);
         writeln(logfile, '[LEN]     ', len);
         writeln(logfile, '[LIBRATONS]    ', libration);
         writeln(logfile, '[%]   ', libration_percent);

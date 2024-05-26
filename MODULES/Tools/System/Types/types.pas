@@ -6,7 +6,8 @@ unit types;
 
 interface
 uses SysUtils,
-    config;
+    config,
+    classifier_config;
 
 type 
     MATRIX = array[1..3,1..3] of extended; // Матрицы поворота в задаче двух тел (модуль TwoBody.pas)
