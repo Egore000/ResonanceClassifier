@@ -1,4 +1,4 @@
-﻿// Логгер для вывода сообщений в лог файл
+﻿// Логгер для вывода сообщений в лог файлы
 
 unit logging;
 
@@ -11,6 +11,8 @@ uses SysUtils,
 
 var
     logger: text;
+    libration_logger: text;
+    nets_logger: text;
 
 
 procedure LogFlags(var logfile: text;
@@ -40,7 +42,7 @@ procedure LogElements(var logfile: text;
                     a0, i0: extended);
 
 procedure LogDiffs(var logfile: text;
-                    diffs: types.EXTREMUM_DIFFS;
+                    diffs, time_diffs: types.EXTREMUM_DIFFS;
                     len: integer;
                     const msg: string);
 
@@ -175,7 +177,7 @@ end;
 
 
 procedure LogDiffs(var logfile: text;
-                    diffs: types.EXTREMUM_DIFFS;
+                    diffs, time_diffs: types.EXTREMUM_DIFFS;
                     len: integer;
                     const msg: string);
 var i: integer;
@@ -184,7 +186,7 @@ begin
     begin
         writeln(logfile, msg);
         for i := 1 to len do
-            write(logfile, diffs[i], config.DELIMITER);
+            writeln(logfile, diffs[i], config.DELIMITER, time_diffs[i]);
         writeln(logfile);
     end;
 end;
@@ -202,7 +204,7 @@ begin
         writeln(logfile, '[TIME_MEAN]    ', time_mean);
         writeln(logfile, '[LEN]     ', len);
         writeln(logfile, '[LIBRATONS]    ', libration);
-        writeln(logfile, '[%]   ', libration_percent);
+        writeln(logfile, '[%]   ', round(libration_percent));
         writeln(logfile);
     end;
 end;
@@ -223,7 +225,13 @@ end;
 begin
     if config.LOGS then
     begin
-        assign(logger, config.BASE_DIR + 'Delphi/Logs/.log');
+        assign(logger, config.BASE_DIR + BASE_LOGGER_PATH);
         rewrite(logger);
+
+        assign(libration_logger, config.BASE_DIR + LIBRATION_LOGGER_PATH);
+        rewrite(libration_logger);
+
+        assign(nets_logger, config.BASE_DIR + NETS_LOGGER_PATH);
+        rewrite(nets_logger);
     end;
 end.

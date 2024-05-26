@@ -71,7 +71,10 @@ begin {Main}
                 if (number mod 100 = 0) then
                     writeln('[FOLDER]', #9, folder, #9, '[FILE]', #9, number);
                 logging.Log(logging.logger, folder, number);
+                logging.Log(logging.libration_logger, folder, number);
+                logging.Log(logging.nets_logger, folder, number);
             end
+
             else
                 break;
 
@@ -113,6 +116,8 @@ begin {Main}
                     a0 := round(a * 10) / 10;
                     i0 := round(i * toDeg);
                     logging.LogElements(logging.logger, a0, i0);
+                    logging.LogElements(logging.libration_logger, a0, i0);
+                    logging.LogElements(logging.nets_logger, a0, i0);
                 end;
 
                 {Вычисление аргументов орбитального резонанса}
@@ -183,7 +188,7 @@ begin {Main}
             if config.DEBUG then
                 service.OutFlag(flag);
 
-            logging.LogFlags(logging.logger, flag);
+            logging.LogFlags(logging.nets_logger, flag);
 
             {Запись классификации в файл}
             filetools.WriteClassification(outdata, folder, number, a0, i0, mean, classes, classes2, classes3);
@@ -199,6 +204,8 @@ begin {Main}
                 close(orbit_res);
 
             logging.Space(logging.logger);
+            logging.Space(logging.libration_logger);
+            logging.Space(logging.nets_logger);
 
             close(data);
         end; {for number}
@@ -207,7 +214,12 @@ begin {Main}
     if config.FREQUENCY then
         close(trans);
 
-    if config.LOGS then close(logger);
+    if config.LOGS then
+    begin
+        close(logger);
+        close(libration_logger);
+        close(nets_logger);
+    end;
     writeln('Finished!');
     readln;
 end.

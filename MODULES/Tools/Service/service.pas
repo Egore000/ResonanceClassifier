@@ -53,14 +53,6 @@ function _isDecreaseBranch(current, next: extended): boolean;
 
 function _isIncreaseBranch(current, next: extended): boolean;
 
-//function CountTransitions(dphi: types.ANGLE_DATA; res: integer): integer;
-//
-//function GetMaximumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-//
-//function GetMinimumDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-//
-//function GetMaximumABSDotPhi(dphi: types.ANGLE_DATA; res: integer): extended;
-
 implementation
 
 

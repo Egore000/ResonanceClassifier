@@ -44,10 +44,6 @@ procedure Classification(net: types.NETWORK;
 // t - массив времени
 // phi, dot_phi - массивы углов и частот
 // classes - выходной массив классов резонанса
-
-// 0 - циркуляция
-// 1 - смешанный тип
-// 2 - либрация
 var
     res, i: integer;
     length: integer;
@@ -89,7 +85,7 @@ begin
 
     logging.LogStats(logging.logger, classes, zero_counter, transitions);
     logging.LogIncDec(logging.logger, increase, decrease);
-    logging.LogNet(logging.logger, net);
+    logging.LogNet(logging.nets_logger, net);
 end; {Classification}
 
 
@@ -129,6 +125,7 @@ var res: integer;
 begin
     for res := config.RES_START to config.RES_FINISH do
     begin
+//        writeln(logging.libration_logger, '[RES]', config.DELIMITER, res);
         utils._GetDiffsArray(phi, time, res, diffs, time_diffs);
 
         if utils._isLibration(diffs, time_diffs) then

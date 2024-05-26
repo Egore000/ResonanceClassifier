@@ -77,6 +77,7 @@ begin
     for i := 1 to len-1 do
         if (dphi[res, i] * dphi[res, i+1] < 0) then
             inc(Result);
+    CountTransitions := Result;
 end; {CountTransitions}
 
 

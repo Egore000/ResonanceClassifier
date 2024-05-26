@@ -35,6 +35,8 @@ function _isInAcceptebleInterval(diff, mean: extended): boolean;
 
 function _isInAcceptebleIntervalTime(diff, mean: extended): boolean;
 
+function _isSmallOscillations(diffs, time_diffs: extended): boolean;
+
 function _isMinimum(phi: types.ANGLE_DATA;
                     res, idx: integer): boolean;
 
@@ -124,13 +126,13 @@ begin
     mean := _Mean(diffs);
     time_mean := _Mean(time_diffs);
 
-    logging.LogDiffs(logging.logger, diffs, len, '[DIFFS]');
-    logging.LogDiffs(logging.logger, time_diffs, len, '[TIME DIFFS]');
+    logging.LogDiffs(logging.libration_logger, diffs, time_diffs, len, '[DIFFS]      [TIME DIFFS]');
 
     libration := 0;
     for idx := 1 to len-1 do
         if _isInAcceptebleInterval(diffs[idx], mean) and
-            _isInAcceptebleIntervalTime(time_diffs[idx], time_mean) then
+            _isInAcceptebleIntervalTime(time_diffs[idx], time_mean) and
+            not _isSmallOscillations(diffs[idx], time_diffs[idx]) then
             
             inc(libration);
 
@@ -144,7 +146,7 @@ begin
     else
         _isLibration := False;
 
-    LogShiftingLibrationInfo(logger, mean, time_mean, len, libration, libration_percent);
+    LogShiftingLibrationInfo(logging.libration_logger, mean, time_mean, len, libration, libration_percent);
 end;
 
 
@@ -162,6 +164,15 @@ begin
     _isInAcceptebleIntervalTime := (diff >= mean - classifier_config.EXTREMUM_LIMIT_TIME) and
                                (diff <= mean + classifier_config.EXTREMUM_LIMIT_TIME);
 end;
+
+
+
+function _isSmallOscillations(diffs, time_diffs: extended): boolean;
+begin
+    Result := (diffs <= classifier_config.LOW_AMPLITUDE) and
+              (time_diffs <= classifier_config.LOW_PERIOD);
+end;
+
 
 
 procedure _GetDiffsArray(phi: types.ANGLE_DATA;
