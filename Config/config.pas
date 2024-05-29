@@ -19,7 +19,8 @@ interface
 const
     ORBITAL = true;                     // Исследование орбитального резонанса
     SECONDARY = false;                  // Исследование вторичных резонансов
-    FREQUENCY = true;                   // Исследование частот
+    FREQUENCY = true;                  // Исследование частот
+    LIDOV_KOZAI = true;                 // Исследование резонанса Лидова-Козаи
 
     // === Запись в файлы ===
     WRITE_ORBIT = false;                // Запись аргументов орбитального резонанса в файл
@@ -33,27 +34,43 @@ const
     TARGET_FOLDER = 'Без светового давления';           // Название папки без светового давления
 //    TARGET_FOLDER = 'Со световым давлением';            // Название папки со световым давлением
 
-//     OMEGA_VALUE = 'Omega_240';                       // Название папки с Омега = 240
-//     OMEGA_VALUE = 'Omega_120';                       // Название папки с Омега = 120
-    OMEGA_VALUE = 'Omega_0';                            // Название папки с Омега = 0
-
+    OMEGA_VALUE = 'Omega_240';                       // Название папки с Омега = 240
+//    OMEGA_VALUE = 'Omega_120';                       // Название папки с Омега = 120
+//    OMEGA_VALUE = 'Omega_0';                           // Название папки с Омега = 0
+//
     // Путь к папке с исходными данными
-    PATH_DATA = BASE_DIR + 'Исходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\';
+    PATH_DATA = BASE_DIR + 'Исходные данные\' +
+                TARGET_FOLDER + '\' + OMEGA_VALUE + '\';
 
     // Путь к файлу с классификацией
-    PATH_CLASSIFICATION = BASE_DIR + 'Классификация\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Классификация.DAT';
+    PATH_CLASSIFICATION = BASE_DIR + 'Классификация\' +
+                          TARGET_FOLDER + '\' + OMEGA_VALUE +
+                          '\Классификация.DAT';
+
+    // Путь к файлу с классификацией резонанса Лидова-Козаи
+    PATH_LK_RESONANCE = BASE_DIR + 'Классификация\' +
+                        TARGET_FOLDER + '\' + OMEGA_VALUE +
+                        '\Резонанс ЛК.DAT';
 
     // Путь к файлу с данными о переходах частоты через 0
-    PATH_TRANS = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Переходы.DAT';
+    PATH_TRANS = BASE_DIR + 'Выходные данные\' +
+                 TARGET_FOLDER + '\' + OMEGA_VALUE +
+                 '\Переходы.DAT';
 
      // Путь к папке с данными об орбитальных резонансах
-    PATH_ORBITAL = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Орбитальные\';
+    PATH_ORBITAL = BASE_DIR + 'Выходные данные\' +
+                   TARGET_FOLDER + '\' + OMEGA_VALUE +
+                   '\Орбитальные\';
 
      // Путь к папке с данными о вторичных резонансах (+)
-    PATH_SECOND_PLUS = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Вторичные\плюс\';
+    PATH_SECOND_PLUS = BASE_DIR + 'Выходные данные\' +
+                       TARGET_FOLDER + '\' + OMEGA_VALUE +
+                       '\Вторичные\плюс\';
 
     // Путь к папке с данными о вторичных резонансах (-)
-    PATH_SECOND_MINUS = BASE_DIR + 'Выходные данные\' + TARGET_FOLDER + '\' + OMEGA_VALUE + '\Вторичные\минус\';
+    PATH_SECOND_MINUS = BASE_DIR + 'Выходные данные\' +
+                        TARGET_FOLDER + '\' + OMEGA_VALUE +
+                        '\Вторичные\минус\';
 
     // Порядок резонанса (U:V)
     U = 1;

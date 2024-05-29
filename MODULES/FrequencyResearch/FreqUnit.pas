@@ -74,10 +74,14 @@ var i, len: integer;
 begin
     Result := 0;
     len := service._Length(dphi, res);
+//    writeln(len);
     for i := 1 to len-1 do
+    begin
         if (dphi[res, i] * dphi[res, i+1] < 0) then
             inc(Result);
-    CountTransitions := Result;
+//        writeln(i, #9, dphi[res, i], #9, dphi[res, i+1]);
+    end;
+
 end; {CountTransitions}
 
 

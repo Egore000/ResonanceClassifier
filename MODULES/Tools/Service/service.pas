@@ -24,11 +24,11 @@ procedure OutNET(net: types.NETWORK);
 
 procedure OutFlag(flag: types.FLAGS);
 
-procedure FillZero(var net, net2, net3: types.NETWORK;
-                    var flag, flag2, flag3: types.FLAGS;
+procedure FillZero(var net, net2, net3, net_w: types.NETWORK;
+                    var flag, flag2, flag3, flag_w: types.FLAGS;
                     var t: types.TIME_DATA;
-                    var phi, phi2, phi3: types.ANGLE_DATA;
-                    var dot_phi, dot_phi2, dot_phi3: types.ANGLE_DATA);
+                    var phi, phi2, phi3, w: types.ANGLE_DATA;
+                    var dot_phi, dot_phi2, dot_phi3, dw: types.ANGLE_DATA);
 
 procedure FillNetsAndArrays(TYPE_: boolean;
                             num, idx, time_idx: integer;
@@ -37,10 +37,7 @@ procedure FillNetsAndArrays(TYPE_: boolean;
                             var flag: types.FLAGS;
                             var phi, dot_phi: types.ANGLE_DATA);
 
-//procedure FrequencyResearch(var f: text;
-//                            df1, df2, df3: types.ANGLE_DATA);
-
-procedure Warning(const path: string);
+function WriteMode(const path: string): string;
 
 function _Length(phi: types.ANGLE_DATA;
                 res: integer): integer;
@@ -127,16 +124,22 @@ end; {_InsertGaps}
 
 
 
-procedure Warning(const path: string);
+function WriteMode(const path: string): string;
 var input: string; // Ввод пользователя
 begin
     if FileExists(path) then
     begin
-        write('Файл ' + path + ' уже существует. Перезаписать? [y/n]: ');
+        write('Файл ' + path + ' уже существует. Перезаписать [y]/Добавить [a]? [y/a/n]: ');
         readln(input);
-        if (input = 'n') then
+        if input = 'n' then
             halt;
-    end;
+        if input = 'y' then
+            Result := 'rewrite';
+        if input = 'a' then
+            Result := 'append';
+    end
+    else
+        Result := 'rewrite';
 end;
 
 
@@ -145,7 +148,7 @@ function _Length(phi: types.ANGLE_DATA;
 // Возвращает длину массива phi[res]
 begin
     Result := 1;
-    while not (phi[res, Result+1] < 1e-6) do
+    while (abs(phi[res, Result+1]) > 1e-20) do
         inc(Result);
 end; {_Length}
 
@@ -188,11 +191,11 @@ end; {OutFlag}
 
 
 
-procedure FillZero(var net, net2, net3: types.NETWORK;
-                    var flag, flag2, flag3: types.FLAGS;
+procedure FillZero(var net, net2, net3, net_w: types.NETWORK;
+                    var flag, flag2, flag3, flag_w: types.FLAGS;
                     var t: types.TIME_DATA;
-                    var phi, phi2, phi3: types.ANGLE_DATA;
-                    var dot_phi, dot_phi2, dot_phi3: types.ANGLE_DATA);
+                    var phi, phi2, phi3, w: types.ANGLE_DATA;
+                    var dot_phi, dot_phi2, dot_phi3, dw: types.ANGLE_DATA);
 // Заполнение массивов нулями
 var num, row, col: integer;
 begin
@@ -204,6 +207,7 @@ begin
             net[num, row, col] := 0;
             net2[num, row, col] := 0;
             net3[num, row, col] := 0;
+            net_w[num, row, col] := 0;
             end;
 
         for row := 1 to 2000 do
@@ -213,10 +217,12 @@ begin
             phi[num, row] := 0;
             phi2[num, row] := 0;
             phi3[num, row] := 0;
+            w[num, row] := 0;
 
             dot_phi[num, row] := 0;
             dot_phi2[num, row] := 0;
             dot_phi3[num, row] := 0;
+            dw[num, row] := 0;
         end;
 
         for row := 1 to classifier_config.LIBRATION_ROWS do
@@ -224,6 +230,7 @@ begin
             flag[num, row] := 0;
             flag2[num, row] := 0;
             flag3[num, row] := 0;
+            flag_w[num, row] := 0;
         end;
     end;
 end; {FillZero}
@@ -238,15 +245,17 @@ procedure FillNetsAndArrays(TYPE_: boolean;
                             var phi, dot_phi: types.ANGLE_DATA);
 // Заполнение массивов компоненты num резонанса типа TYPE_
 var angle_idx: integer;
+    angle: extended;
 begin
     if TYPE_ then
     begin
-        angle_idx := trunc(angles[num] * constants.toDeg / classifier_config.ROW_STEP) + 1;
+        angle := angles[num] * constants.toDeg;
+        angle_idx := trunc(angle / classifier_config.ROW_STEP) + 1;
 
         inc(net[num, angle_idx, time_idx]); // Заполнение сетки
-        inc(flag[num, trunc(angles[num] * constants.toDeg / classifier_config.LIBRATION_STEP) + 1]); // Заполнение полос
+        inc(flag[num, trunc(angle / classifier_config.LIBRATION_STEP) + 1]); // Заполнение полос
 
-        phi[num, idx] := angles[num] * constants.toDeg;
+        phi[num, idx] := angle;
         dot_phi[num, idx] := freq[num];
     end;
 end; {FillNetsAndArrays}

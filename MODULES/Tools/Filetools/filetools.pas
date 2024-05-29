@@ -17,7 +17,7 @@ procedure WriteToFile(var f: text;
 
 procedure WriteClassification(var f: text;
                             folder, number: integer;
-                            a0, i0, megno: extended;
+                            a0, i0, megno, ecc: extended;
                             classes, classes2, classes3: types.CLS);
 
 procedure WriteClassificationHeader(var f: text);
@@ -27,6 +27,13 @@ procedure WriteTransitions(var f: text;
                             max_dphi, min_dphi, max_abs_dphi: types.ARR);
 
 procedure WriteTransitionHeader(var f: text);
+
+procedure WriteLidovKozai(var f: text;
+                            folder, number: integer;
+                            a0, i0: extended;
+                            classes_w: types.CLS);
+
+procedure WriteLidovKozaiHeader(var f: text);
 
 function FileNumberToFileName(file_number: integer): string;
 
@@ -41,13 +48,12 @@ begin
     assign(f, path);
     rewrite(f);
     write(f, 't', config.DELIMITER);
-    if ORBITAL then
-        for i := config.RES_START to config.RES_FINISH do
-            write(f, 'F', i, config.DELIMITER);
 
-    if SECONDARY then
-        for i := config.RES_START to config.RES_FINISH do
-            write(f, 'dF', i, config.DELIMITER);
+    for i := config.RES_START to config.RES_FINISH do
+        write(f, 'F', i, config.DELIMITER);
+    for i := config.RES_START to config.RES_FINISH do
+        write(f, 'dF', i, config.DELIMITER);
+
     writeln(f);
 end; {Create_File}
 
@@ -70,7 +76,7 @@ end; {WriteToFile}
 
 procedure WriteClassification(var f: text;
                             folder, number: integer;
-                            a0, i0, megno: extended;
+                            a0, i0, megno, ecc: extended;
                             classes, classes2, classes3: types.CLS);
 // Запись в файл с классификацией
 var i: integer;
@@ -80,7 +86,8 @@ begin
                 number,  config.DELIMITER,
                 a0:0:3,  config.DELIMITER,
                 i0:0:0,  config.DELIMITER,
-                megno:0:6, config.DELIMITER)
+                megno:0:6, config.DELIMITER,
+                ecc, config.DELIMITER)
     else
         write(f, folder, config.DELIMITER, number, config.DELIMITER);
 
@@ -113,7 +120,8 @@ begin
                 'file',    config.DELIMITER,
                 'a, km',   config.DELIMITER,
                 'i, grad', config.DELIMITER,
-                'MEGNO',   config.DELIMITER)
+                'MEGNO',   config.DELIMITER,
+                'e', config.DELIMITER)
     else
         write(f, 'folder', config.DELIMITER,
                 'file',    config.DELIMITER);
@@ -149,6 +157,7 @@ begin
     for num := config.RES_START to config.RES_FINISH do
         write(f, max_abs_dphi[num], config.DELIMITER);
 end;
+
 
 procedure WriteTransitionHeader(var f: text);
 // Запись заголовка в файл для данных о переходах частоты через 0
@@ -196,6 +205,33 @@ begin
 
     writeln(f);
 end; {WriteTransitionHeader}
+
+
+
+procedure WriteLidovKozai(var f: text;
+                            folder, number: integer;
+                            a0, i0: extended;
+                            classes_w: types.CLS);
+begin
+    writeln(f, folder, config.DELIMITER,
+               number, config.DELIMITER,
+               a0,     config.DELIMITER,
+               i0,     config.DELIMITER,
+               classes_w[1]);
+end; {WriteLidovKozai}
+
+
+
+procedure WriteLidovKozaiHeader(var f: text);
+var num: integer;
+begin
+    writeln(f, 'folder', config.DELIMITER,
+               'file', config.DELIMITER,
+               'a, km', config.DELIMITER,
+               'i, grad', config.DELIMITER,
+               'w res');
+end; {WriteLidovKozaiHeader}
+
 
 
 function FileNumberToFileName(file_number: integer): string;

@@ -9,7 +9,6 @@ const
     LIBRATION_LOGGER_PATH = 'Delphi/logs/libration.log';    // Лог файл для либраций
     NETS_LOGGER_PATH = 'Delphi/logs/nets.log';              // Лог файл для сеток
 
-
 implementation
 
 end.
