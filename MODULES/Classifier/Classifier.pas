@@ -11,7 +11,8 @@ uses SysUtils,
     math,
     filetools,
     logging,
-    config;
+    config,
+    classifier_config;
 
 
 procedure Classification(net: types.NETWORK;
@@ -25,6 +26,7 @@ procedure _Libration(flag: types.FLAGS;
                      var classes: types.CLS);
 
 procedure _LibrationWithShiftingCenter(phi: types.ANGLE_DATA;
+                                       time: types.TIME_DATA;
                                        var classes: types.CLS);
 
 implementation
@@ -42,10 +44,6 @@ procedure Classification(net: types.NETWORK;
 // t - массив времени
 // phi, dot_phi - массивы углов и частот
 // classes - выходной массив классов резонанса
-
-// 0 - циркуляция
-// 1 - смешанный тип
-// 2 - либрация
 var
     res, i: integer;
     length: integer;
@@ -66,11 +64,11 @@ begin
         begin
             // Подсчёт убывющих точек
             if service._isDecrease(phi[res, i], phi[res, i+1]) then
-                inc(decrease[res]);
+            else inc(decrease[res]);
 
             // Подсчёт возрастающих точек
             if service._isIncrease(phi[res, i], phi[res, i+1]) then
-                inc(increase[res]);
+            else inc(increase[res]);
 
             // Подсчёт переходов частоты через 0
             if (dot_phi[res, i] * dot_phi[res, i+1]) < 0 then inc(transitions[res]);
@@ -79,15 +77,15 @@ begin
 
     _Libration(flag, increase, decrease, zero_counter, classes);
 
-    if config.LIBRATION_WITH_SHIFTING_CENTER then
-        _LibrationWithShiftingCenter(phi, classes);
+    if classifier_config.LIBRATION_WITH_SHIFTING_CENTER then
+        _LibrationWithShiftingCenter(phi, t, classes);
 
     utils._DebugResonanceInfo(classes, length, zero_counter, transitions);
     utils._DebugArraysInfo(increase, decrease, net);
 
     logging.LogStats(logging.logger, classes, zero_counter, transitions);
     logging.LogIncDec(logging.logger, increase, decrease);
-    logging.LogNet(logging.logger, net);
+    logging.LogNet(logging.nets_logger, net);
 end; {Classification}
 
 
@@ -101,35 +99,37 @@ begin
     begin
         libration := 0;
 
-        for i := 1 to config.LIBRATION_ROWS do
+        for i := 1 to classifier_config.LIBRATION_ROWS do
             if (flag[res, i] = 0) then inc(libration);
 
         if (libration > 0) and (increase[res] <> 0) and (decrease[res] <> 0) then
-            classes[res] := 2
+            classes[res] := classifier_config.LIBRATION_MARKER
         else
-            if  (increase[res] <= config.LIMIT) or
-                (decrease[res] <= config.LIMIT) or
-                (zeros[res] <= config.EMPTY_CELLS) then
+            if  (increase[res] <= classifier_config.LIMIT) or
+                (decrease[res] <= classifier_config.LIMIT) or
+                (zeros[res] <= classifier_config.EMPTY_CELLS) then
 
-                classes[res] := 0
+                classes[res] := classifier_config.CIRCULATION_MARKER
             else
-                classes[res] := 1;
+                classes[res] := classifier_config.MIXED_MARKER;
     end;
 end; {_Libration}
 
 
 
 procedure _LibrationWithShiftingCenter(phi: types.ANGLE_DATA;
+                                       time: types.TIME_DATA;
                                        var classes: types.CLS);
 var res: integer;
-    diffs: types.EXTREMUM_DIFFS;
+    diffs, time_diffs: types.EXTREMUM_DIFFS;
 begin
     for res := config.RES_START to config.RES_FINISH do
     begin
-        diffs := utils._GetDiffsArray(phi, res);
+//        writeln(logging.libration_logger, '[RES]', config.DELIMITER, res);
+        utils._GetDiffsArray(phi, time, res, diffs, time_diffs);
 
-        if utils._isLibration(diffs) then
-            classes[res] := 2;
+        if utils._isLibration(diffs, time_diffs) then
+            classes[res] := classifier_config.LIBRATION_WITH_SHIFTING_CENTER_MARKER;
     end;
 end;
 

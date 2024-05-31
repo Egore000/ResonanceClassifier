@@ -1,4 +1,4 @@
-unit constants;
+﻿unit constants;
 
 interface
 const 
@@ -15,6 +15,8 @@ const
     t0 = 0; // Начальная эпоха
 
     ecc = 1e-3; // Эксцентриситет орбиты
+
+    SecondInYear = 86400 * 365; // Количество секунд в году
 implementation
 begin
 end.
