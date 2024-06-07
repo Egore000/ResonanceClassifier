@@ -15,7 +15,7 @@ var coords, velocities: MAS; // Массивы координат и скоро�
     classes, classes2, classes3, classes_w: CLS; // Массивы с классификацией резонансов
 
     a, e, max_ecc, i, Omega, w, M, megno, mean_megno, mean: extended;
-    a0, i0: extended; // Начальные параметры орбиты
+    a0, i0, Omega0: extended; // Начальные параметры орбиты
     tm, time, day: extended;
     year, month, x: integer;
     idx, time_idx: integer; // Индексы

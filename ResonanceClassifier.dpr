@@ -143,6 +143,7 @@ begin {Main}
                 begin
                     a0 := round(a * 10) / 10;
                     i0 := round(i * toDeg);
+                    Omega0 := round((Omega + PI)* toDeg);
                     logging.LogElements(logging.logger, a0, i0);
                     logging.LogElements(logging.libration_logger, a0, i0);
                     logging.LogElements(logging.nets_logger, a0, i0);
@@ -236,7 +237,9 @@ begin {Main}
             logging.LogFlags(logging.nets_logger, flag);
 
             {Запись классификации в файл}
-            filetools.WriteClassification(outdata, folder, number, a0, i0, mean, max_ecc, classes, classes2, classes3);
+            filetools.WriteClassification(outdata, folder, number,
+                                        a0, i0, Omega0, mean, mean_megno, max_ecc,
+                                        classes, classes2, classes3);
 
             {Запись резонансов Лидова-Козаи в файл}
             if config.LIDOV_KOZAI then
