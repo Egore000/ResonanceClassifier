@@ -17,7 +17,7 @@ procedure WriteToFile(var f: text;
 
 procedure WriteClassification(var f: text;
                             folder, number: integer;
-                            a0, i0, megno, ecc: extended;
+                            a0, i0, Omega0, megno, last_megno, ecc: extended;
                             classes, classes2, classes3: types.CLS);
 
 procedure WriteClassificationHeader(var f: text);
@@ -76,7 +76,7 @@ end; {WriteToFile}
 
 procedure WriteClassification(var f: text;
                             folder, number: integer;
-                            a0, i0, megno, ecc: extended;
+                            a0, i0, Omega0, megno, last_megno, ecc: extended;
                             classes, classes2, classes3: types.CLS);
 // Запись в файл с классификацией
 var i: integer;
@@ -86,7 +86,9 @@ begin
                 number,  config.DELIMITER,
                 a0:0:3,  config.DELIMITER,
                 i0:0:0,  config.DELIMITER,
+                Omega0:0:0, config.DELIMITER,
                 megno:0:6, config.DELIMITER,
+                last_megno:0:6, config.DELIMITER,
                 ecc, config.DELIMITER)
     else
         write(f, folder, config.DELIMITER, number, config.DELIMITER);
@@ -120,7 +122,9 @@ begin
                 'file',    config.DELIMITER,
                 'a, km',   config.DELIMITER,
                 'i, grad', config.DELIMITER,
+                'Omega, grad', config.DELIMITER,
                 'MEGNO',   config.DELIMITER,
+                'MEGNO (100 yr)', config.DELIMITER,
                 'e', config.DELIMITER)
     else
         write(f, 'folder', config.DELIMITER,
